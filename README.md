@@ -1,2 +1,2 @@
 # vocab_app
-for fun
+vocab application
