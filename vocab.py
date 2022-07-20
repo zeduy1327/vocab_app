@@ -316,27 +316,106 @@ number_of_ques_dropdownlist.place(
 eng_chosen_dictionary = []
 viet_chosen_dictionary = []
 number_of_ques = 0
-# function to get all setting value from user
 
+# label "Quiz"
+dailytask_quiz_label = Label(
+    dailytask_display_area, text="Quiz", bd=0, relief=RIDGE, anchor=CENTER,
+    font="-family {Comic Sans MS} -size 24 -weight bold", bg="#CBCAE6", foreground="#000000", highlightthickness=0.5)
+dailytask_quiz_label.place(
+    relx=0.01, rely=0, relheight=0.09, relwidth=0.5)
+
+# canvas to store all question buttons
 dailytask_question_canvas = Canvas(dailytask_display_area, bg="#CBCAE6", highlightthickness=0.5)
 dailytask_question_canvas.place(relx=0.5, rely=0, relheight=0.1, relwidth=0.5)
 
+# big canvas for doing quiz
 dailytask_quiz_area = Canvas(dailytask_display_area, bg="#CBCAE6", highlightthickness=0.5)
 dailytask_quiz_area.place(relx=0, rely=0.1, relheight=0.9, relwidth=1)
 
+# canvas to fill in quiz
+vocab_quiz_fillin_area = Canvas(dailytask_quiz_area, bg="#CBCAE6", highlightthickness=0.5)
+vocab_quiz_fillin_area.place(relx=0, rely=0, relheight=0.7, relwidth=0.5)
+
+# canvas to show the image which represent the quiz-word
+vocab_quiz_image_area = Canvas(dailytask_quiz_area, bg="#CBCAE6", highlightthickness=0.5)
+vocab_quiz_image_area.place(relx=0.5, rely=0, relheight=0.7, relwidth=0.5)
+
+# canvas to store all entrybox for the quiz
+vocab_fillin_canvas = Canvas(vocab_quiz_fillin_area, bg="pink", highlightthickness=0.5)
+vocab_fillin_canvas.place(relx=0, rely=0.15, relheight=0.2, relwidth=1)
+
+# initiator all entry boxes
+relx_value = 0
+textbox_list= []
+for i in range(20):
+    if relx_value < 0.9:
+        my_textbox = Text(vocab_fillin_canvas,
+                    font="-family {Comic Sans MS} -size 20 -weight bold", state = DISABLED)
+        my_textbox.place(relx=relx_value, rely=0, relheight=0.5, relwidth=0.1)
+        relx_value += 0.1
+        textbox_list.append(my_textbox)
+    else:
+        my_textbox = Text(vocab_fillin_canvas,
+                    font="-family {Comic Sans MS} -size 20 -weight bold", state = DISABLED)
+        my_textbox.place(relx=relx_value - 1, rely=0.5, relheight=0.5, relwidth=0.1)
+        relx_value += 0.1
+        textbox_list.append(my_textbox)
+
+# default color of button
+original_bg_color_textbox = textbox_list[0].cget("background")
+# original_fore_color = textbox_list[0].cget("foreground")
+
+# function to limit number of characters
+def limit_text(text):
+    value = text.get()
+    if len(value) > 2: text.set(value[:1])
+
+# function to generate the quiz after user select a quiz
 def generate_question(x, eng_random_vocab_list, viet_random_vocab_list):
+    dailytask_quiz_label = Label(
+        dailytask_display_area, text="Question " + str(x + 1), bd=0, relief=RIDGE, anchor=CENTER,
+        font="-family {Comic Sans MS} -size 24 -weight bold", bg="#CBCAE6", foreground="#000000", highlightthickness=0.5)
+    dailytask_quiz_label.place(
+        relx=0, rely=0, relheight=0.1, relwidth=0.5)
+    quiz_string = ""
     quiz_word_char_list = []
     index_to_pop_list = []
+    # quiz_word_char_list_copy = []
     missing_characters_list = []
-    quiz_eng_word = eng_random_vocab_list[x-1]
-    quiz_viet_word = viet_random_vocab_list[x-1]
+    quiz_eng_word = eng_random_vocab_list[x]
+    quiz_viet_word = viet_random_vocab_list[x]
     for char in quiz_eng_word:
         quiz_word_char_list.append(char)
+    
+    quiz_number_of_character = len(quiz_word_char_list)
     for i in range(3):
         index = random.randint(0, len(quiz_word_char_list)-1)
         if not index in index_to_pop_list:
             index_to_pop_list.append(index)
+    
+    for idx in index_to_pop_list:
+        quiz_word_char_list[idx] = ''
 
+    if quiz_number_of_character <= 10:
+        new_textbox_list = textbox_list[int(((10-quiz_number_of_character)/2)) : int((10 - (10-quiz_number_of_character)/2))]
+    elif quiz_number_of_character > 10:
+        new_textbox_list_row1 = textbox_list[0:10]
+        new_textbox_list_row2 = textbox_list[int(10 + ((20-quiz_number_of_character)/2)) : int((20 - (20-quiz_number_of_character)/2))]
+        new_textbox_list = new_textbox_list_row1 + new_textbox_list_row2
+    
+    for textbox in textbox_list:
+        textbox.delete('1.0', END)
+        textbox.config(state = DISABLED, bg = original_bg_color_textbox)
+
+    for idx, textbox in enumerate(new_textbox_list):
+        if quiz_word_char_list[idx] != ' ':
+            textbox.config(state = NORMAL, bg = 'pink')
+            textbox.insert(END, quiz_word_char_list[idx])
+        if quiz_word_char_list[idx] == '':
+            textbox.config(fg ='red')
+
+
+# initiator all question buttons
 number1_ques_button = Button(dailytask_question_canvas, text="1",
                                  font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number1_ques_button.place(relx=0, rely=0, relheight=0.5, relwidth=0.1)
@@ -417,19 +496,87 @@ number20_ques_button = Button(dailytask_question_canvas, text="20",
                                 font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number20_ques_button.place(relx=0.9, rely=0.5, relheight=0.5, relwidth=0.1)
 
+# default color of button
+original_bg_color = number1_ques_button.cget("background")
+original_fore_color = number1_ques_button.cget("foreground")
+
+# function to generate question bar after user click "Generate quiz"
 def generate_question_bar(eng_random_vocab_list, viet_random_vocab_list, number_of_ques):
-    
-    dailytask_question_list = [number1_ques_button, number2_ques_button, number3_ques_button, number4_ques_button, number5_ques_button,
+    ques_index = 0
+    dailytask_question_button_list = [number1_ques_button, number2_ques_button, number3_ques_button, number4_ques_button, number5_ques_button,
             number6_ques_button, number7_ques_button, number8_ques_button, number9_ques_button, number10_ques_button,
             number11_ques_button, number12_ques_button, number13_ques_button, number14_ques_button, number15_ques_button,
             number16_ques_button, number17_ques_button, number18_ques_button, number19_ques_button, number20_ques_button]
+    
+    number1_ques_button.config(command=lambda: generate_question(
+                                0, eng_random_vocab_list, viet_random_vocab_list))
+
+    number2_ques_button.config(command=lambda: generate_question(
+                                1, eng_random_vocab_list, viet_random_vocab_list))
+                                
+    number3_ques_button.config(command=lambda: generate_question(
+                                2, eng_random_vocab_list, viet_random_vocab_list))
+                                
+    number4_ques_button.config(command=lambda: generate_question(
+                                3, eng_random_vocab_list, viet_random_vocab_list))
+                                
+    number5_ques_button.config(command=lambda: generate_question(
+                                4, eng_random_vocab_list, viet_random_vocab_list))
+                                
+    number6_ques_button.config(command=lambda: generate_question(
+                                5, eng_random_vocab_list, viet_random_vocab_list))
+                                
+    number7_ques_button.config(command=lambda: generate_question(
+                                6, eng_random_vocab_list, viet_random_vocab_list))
+                                
+    number8_ques_button.config(command=lambda: generate_question(
+                                7, eng_random_vocab_list, viet_random_vocab_list))
+                                
+    number9_ques_button.config(command=lambda: generate_question(
+                                8, eng_random_vocab_list, viet_random_vocab_list))
+                                
+    number10_ques_button.config(command=lambda: generate_question(
+                                9, eng_random_vocab_list, viet_random_vocab_list))
+                                
+    number11_ques_button.config(command=lambda: generate_question(
+                                10, eng_random_vocab_list, viet_random_vocab_list))
+                                
+    number12_ques_button.config(command=lambda: generate_question(
+                                11, eng_random_vocab_list, viet_random_vocab_list))
+                                
+    number13_ques_button.config(command=lambda: generate_question(
+                                12, eng_random_vocab_list, viet_random_vocab_list))
+                                
+    number14_ques_button.config(command=lambda: generate_question(
+                                13, eng_random_vocab_list, viet_random_vocab_list))
+                                
+    number15_ques_button.config(command=lambda: generate_question(
+                                14, eng_random_vocab_list, viet_random_vocab_list))
+                                
+    number16_ques_button.config(command=lambda: generate_question(
+                                15, eng_random_vocab_list, viet_random_vocab_list))
+                                
+    number17_ques_button.config(command=lambda: generate_question(
+                                16, eng_random_vocab_list, viet_random_vocab_list))
+                                
+    number18_ques_button.config(command=lambda: generate_question(
+                                17, eng_random_vocab_list, viet_random_vocab_list))
+                                
+    number19_ques_button.config(command=lambda: generate_question(
+                                18, eng_random_vocab_list, viet_random_vocab_list))
+                                
+    number20_ques_button.config(command=lambda: generate_question(
+                                19, eng_random_vocab_list, viet_random_vocab_list))
+
+    # reset config of button in question bar
+    for i in range(20):
+        dailytask_question_button_list[i].config(state=DISABLED, background=original_bg_color, foreground=original_fore_color)
     for i in range(number_of_ques):
-        dailytask_question_list[i].config(state=NORMAL, background="#F7A7A6", foreground="#5E4388")
-        dailytask_question_list[i].config(command=lambda: generate_question(
-                                    i+1, eng_random_vocab_list, viet_random_vocab_list))
+        dailytask_question_button_list[i].config(state=NORMAL, background="#F7A7A6", foreground="#5E4388")
+       
 
 
-def generate():
+def generate_quiz():
     eng_random_vocab_list = []
     viet_random_vocab_list = []
     number_of_ques = int(number_of_ques_value.get())
@@ -448,7 +595,7 @@ def generate():
 
 # button to generate quiz (based on above setting)
 dailytask_selection_setting_generate_button = Button(dailytask_setting_area, text="Generate quiz",
-                                                     font="-family {Comic Sans MS} -size 12", command=generate)
+                                                     font="-family {Comic Sans MS} -size 12", command=generate_quiz)
 dailytask_selection_setting_generate_button.place(
     relx=0.5, rely=0.75, relheight=0.15, relwidth=0.45)
 
