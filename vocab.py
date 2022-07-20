@@ -227,12 +227,26 @@ def translate():
         viet_label = Label(display_area, text=viet_word,
                            font="-family {Comic Sans MS} -size 12")
         viet_label.place(relx=0.2, rely=0.8, relheight=0.1, relwidth=0.6)
+        vocab_display_frame = Frame(display_area, relief=RIDGE, borderwidth=1)
+        vocab_display_frame.place(relx=0.2, rely=0.1, relheight=0.6, relwidth=0.6)
+
+        # image display
         img_path = str(index) + ".png"
-        vocab_img_canvas = Canvas(display_area, bg='pink',highlightthickness=0.5)
-        vocab_img_canvas.place(relx=0.2, rely=0.1, relheight=0.6, relwidth=0.6)
-        img = ImageTk.PhotoImage(Image.open(img_path))
-        vocab_img_canvas.create_image(anchor=NW, image=img)
-        vocab_img_canvas.image = img
+        vocab_display_first_image = (Image.open(img_path))
+        resized_image= vocab_display_first_image.resize((430,400), Image.ANTIALIAS)
+        vocab_display_image= ImageTk.PhotoImage(resized_image)
+        vocab_display_label = Label(vocab_display_frame)
+        vocab_display_label.place(relx=0, rely=0, relheight=1, relwidth=1)
+        vocab_display_label.image = vocab_display_image
+        vocab_display_label.configure(image=vocab_display_image)
+
+
+
+        # vocab_img_canvas = Canvas(display_area, bg='pink',highlightthickness=0.5)
+        # vocab_img_canvas.place(relx=0.2, rely=0.1, relheight=0.6, relwidth=0.6)
+        # img = ImageTk.PhotoImage(Image.open(img_path))
+        # vocab_img_canvas.create_image(anchor=NW, image=img)
+        # vocab_img_canvas.image = img
     except:
         pass
 
@@ -371,7 +385,23 @@ def limit_text(text):
     if len(value) > 2: text.set(value[:1])
 
 # function to generate the quiz after user select a quiz
-def generate_question(x, eng_random_vocab_list, viet_random_vocab_list):
+def generate_question(x, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary):
+    quiz_image_frame = Frame(vocab_quiz_image_area, relief=RIDGE, borderwidth=1)
+    quiz_image_frame.place(relx=0, rely=0, relheight=1, relwidth=1)
+
+    # image display quiz
+    quiz_word = eng_random_vocab_list[x]
+    index = eng_chosen_dictionary.index(quiz_word)
+
+    quiz_img_path = str(index) + ".png"
+    quiz_display_first_image = (Image.open(quiz_img_path))
+    resized_image= quiz_display_first_image.resize((430,400), Image.ANTIALIAS)
+    quiz_display_image= ImageTk.PhotoImage(resized_image)
+    quiz_display_label = Label(quiz_image_frame)
+    quiz_display_label.place(relx=0, rely=0, relheight=1, relwidth=1)
+    quiz_display_label.image = quiz_display_image
+    quiz_display_label.configure(image=quiz_display_image)
+
     dailytask_quiz_label = Label(
         dailytask_display_area, text="Question " + str(x + 1), bd=0, relief=RIDGE, anchor=CENTER,
         font="-family {Comic Sans MS} -size 24 -weight bold", bg="#CBCAE6", foreground="#000000", highlightthickness=0.5)
@@ -405,7 +435,7 @@ def generate_question(x, eng_random_vocab_list, viet_random_vocab_list):
     
     for textbox in textbox_list:
         textbox.delete('1.0', END)
-        textbox.config(state = DISABLED, bg = original_bg_color_textbox)
+        textbox.config(state = DISABLED, bg = original_bg_color_textbox, fg = 'black')
 
     for idx, textbox in enumerate(new_textbox_list):
         if quiz_word_char_list[idx] != ' ':
@@ -501,7 +531,7 @@ original_bg_color = number1_ques_button.cget("background")
 original_fore_color = number1_ques_button.cget("foreground")
 
 # function to generate question bar after user click "Generate quiz"
-def generate_question_bar(eng_random_vocab_list, viet_random_vocab_list, number_of_ques):
+def generate_question_bar(eng_random_vocab_list, viet_random_vocab_list, number_of_ques, eng_chosen_dictionary):
     ques_index = 0
     dailytask_question_button_list = [number1_ques_button, number2_ques_button, number3_ques_button, number4_ques_button, number5_ques_button,
             number6_ques_button, number7_ques_button, number8_ques_button, number9_ques_button, number10_ques_button,
@@ -509,64 +539,64 @@ def generate_question_bar(eng_random_vocab_list, viet_random_vocab_list, number_
             number16_ques_button, number17_ques_button, number18_ques_button, number19_ques_button, number20_ques_button]
     
     number1_ques_button.config(command=lambda: generate_question(
-                                0, eng_random_vocab_list, viet_random_vocab_list))
+                                0, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
 
     number2_ques_button.config(command=lambda: generate_question(
-                                1, eng_random_vocab_list, viet_random_vocab_list))
+                                1, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
                                 
     number3_ques_button.config(command=lambda: generate_question(
-                                2, eng_random_vocab_list, viet_random_vocab_list))
+                                2, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
                                 
     number4_ques_button.config(command=lambda: generate_question(
-                                3, eng_random_vocab_list, viet_random_vocab_list))
+                                3, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
                                 
     number5_ques_button.config(command=lambda: generate_question(
-                                4, eng_random_vocab_list, viet_random_vocab_list))
+                                4, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
                                 
     number6_ques_button.config(command=lambda: generate_question(
-                                5, eng_random_vocab_list, viet_random_vocab_list))
+                                5, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
                                 
     number7_ques_button.config(command=lambda: generate_question(
-                                6, eng_random_vocab_list, viet_random_vocab_list))
+                                6, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
                                 
     number8_ques_button.config(command=lambda: generate_question(
-                                7, eng_random_vocab_list, viet_random_vocab_list))
+                                7, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
                                 
     number9_ques_button.config(command=lambda: generate_question(
-                                8, eng_random_vocab_list, viet_random_vocab_list))
+                                8, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
                                 
     number10_ques_button.config(command=lambda: generate_question(
-                                9, eng_random_vocab_list, viet_random_vocab_list))
+                                9, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
                                 
     number11_ques_button.config(command=lambda: generate_question(
-                                10, eng_random_vocab_list, viet_random_vocab_list))
+                                10, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
                                 
     number12_ques_button.config(command=lambda: generate_question(
-                                11, eng_random_vocab_list, viet_random_vocab_list))
+                                11, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
                                 
     number13_ques_button.config(command=lambda: generate_question(
-                                12, eng_random_vocab_list, viet_random_vocab_list))
+                                12, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
                                 
     number14_ques_button.config(command=lambda: generate_question(
-                                13, eng_random_vocab_list, viet_random_vocab_list))
+                                13, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
                                 
     number15_ques_button.config(command=lambda: generate_question(
-                                14, eng_random_vocab_list, viet_random_vocab_list))
+                                14, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
                                 
     number16_ques_button.config(command=lambda: generate_question(
-                                15, eng_random_vocab_list, viet_random_vocab_list))
+                                15, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
                                 
     number17_ques_button.config(command=lambda: generate_question(
-                                16, eng_random_vocab_list, viet_random_vocab_list))
+                                16, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
                                 
     number18_ques_button.config(command=lambda: generate_question(
-                                17, eng_random_vocab_list, viet_random_vocab_list))
+                                17, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
                                 
     number19_ques_button.config(command=lambda: generate_question(
-                                18, eng_random_vocab_list, viet_random_vocab_list))
+                                18, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
                                 
     number20_ques_button.config(command=lambda: generate_question(
-                                19, eng_random_vocab_list, viet_random_vocab_list))
+                                19, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
 
     # reset config of button in question bar
     for i in range(20):
@@ -590,7 +620,7 @@ def generate_quiz():
     for i in random_index_list:
         eng_random_vocab_list.append(architecture_vocab_eng_list[i])
         viet_random_vocab_list.append(architecture_vocab_viet_list[i])
-    generate_question_bar(eng_random_vocab_list, viet_random_vocab_list, number_of_ques)
+    generate_question_bar(eng_random_vocab_list, viet_random_vocab_list, number_of_ques, eng_chosen_dictionary)
 
 
 # button to generate quiz (based on above setting)
