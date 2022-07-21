@@ -3,6 +3,28 @@ from tkinter import *
 # from tkinter.ttk import *
 import random
 from PIL import ImageTk, Image
+import os
+import sqlite3
+
+a = os.getcwd()
+print (a)
+try:
+    sqliteConnection = sqlite3.connect("C:/Users/nhann/Desktop/vocab/dict_hh.db")
+    cursor = sqliteConnection.cursor()
+    print("Database created and Successfully Connected to SQLite")
+
+    sqlite_select_Query = "SELECT * FROM av"
+    cursor.execute(sqlite_select_Query)
+    record = cursor.fetchall()
+    # print("SQLite Database Version is: ", record)
+    cursor.close()
+
+except sqlite3.Error as error:
+    print("Error while connecting to sqlite", error)
+finally:
+    if sqliteConnection:
+        sqliteConnection.close()
+        print("The SQLite connection is closed")
 
 root = Tk()
 
@@ -406,7 +428,7 @@ def generate_question(x, eng_random_vocab_list, viet_random_vocab_list, eng_chos
         dailytask_display_area, text="Question " + str(x + 1), bd=0, relief=RIDGE, anchor=CENTER,
         font="-family {Comic Sans MS} -size 24 -weight bold", bg="#CBCAE6", foreground="#000000", highlightthickness=0.5)
     dailytask_quiz_label.place(
-        relx=0, rely=0, relheight=0.1, relwidth=0.5)
+        relx=0.01, rely=0.01, relheight=0.08, relwidth=0.48)
     quiz_string = ""
     quiz_word_char_list = []
     index_to_pop_list = []
