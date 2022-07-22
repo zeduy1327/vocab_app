@@ -6,26 +6,37 @@ from PIL import ImageTk, Image
 import os
 import sqlite3
 
-a = os.getcwd()
-print (a)
-try:
-    sqliteConnection = sqlite3.connect("C:/Users/nhann/Desktop/vocab/dict_hh.db")
-    cursor = sqliteConnection.cursor()
-    print("Database created and Successfully Connected to SQLite")
+def generate_db(db_name, table_name):
+    try:
+        sqliteConnection = sqlite3.connect(db_name)
+        cursor = sqliteConnection.cursor()
+        # print("Database created and Successfully Connected to SQLite")
 
-    sqlite_select_Query = "SELECT * FROM av"
-    cursor.execute(sqlite_select_Query)
-    record = cursor.fetchall()
-    # print("SQLite Database Version is: ", record)
-    cursor.close()
+        sqlite_select_Query = "SELECT * FROM " + table_name
+        cursor.execute(sqlite_select_Query)
+        record = cursor.fetchall()
+        # print("SQLite Database Version is: ", record)
+        cursor.close()
 
-except sqlite3.Error as error:
-    print("Error while connecting to sqlite", error)
-finally:
-    if sqliteConnection:
-        sqliteConnection.close()
-        print("The SQLite connection is closed")
+    except sqlite3.Error as error:
+        pass
+        # print("Error while connecting to sqlite", error)
+    finally:
+        if sqliteConnection:
+            sqliteConnection.close()
+            # print("The SQLite connection is closed")
+    return record
 
+def vocab_dictionary_selection(vocab_eng_chosen_dictionary, vocab_viet_chosen_dictionary):
+    if vocab_dictionary_value.get() == 'General English':
+        vocab_eng_chosen_dictionary = generate_db("general_english.db", "av")
+        vocab_viet_chosen_dictionary = generate_db("general_english.db", "va")
+    elif vocab_dictionary_value.get() == 'Architecture dictionary':
+        vocab_eng_chosen_dictionary = architecture_vocab_eng_list.copy()
+        vocab_viet_chosen_dictionary = architecture_vocab_viet_list.copy()
+    else:
+        pass
+    return vocab_eng_chosen_dictionary, vocab_viet_chosen_dictionary
 root = Tk()
 
 # Adjust size
@@ -46,37 +57,54 @@ main_canvas.configure(cursor="circle #FF00FF")
 
 # Create the header text for the product's name
 
+def clear_vocab_page():
+    vocab_dictionary_value.set('Choose your dictionary')
+    vocab_input.delete(0, END)
+    vocab_input_button.config(state = DISABLED)
+    translate_button.config(state = DISABLED)
+    vocab_list.delete(0, END)
+    vocab_scrollbar.place_forget()
+    vocab_display_area.place_forget()
+
+def clear_quiz_page():
+    quiz_dictionary_value.set('Choose your dictionary')
+    number_of_ques_value.set('Number of questions')
+    for textbox in textbox_list:
+        textbox.delete(0, END)
+        textbox.config(bg = original_bg_color_textbox)
+    for button in quiz_question_button_list:
+        button.config(bg = original_bg_color)
 
 def turn_on_home_page():
     # forget unused canvas
     vocab_page.place_forget()
-    daily_task_page.place_forget()
+    quiz_page.place_forget()
     ielts_page.place_forget()
     home_page.place(relx=0.0, rely=0, relheight=1, relwidth=1)
-
+    clear_vocab_page()
 
 def turn_on_vocab_page():
     # forget unused canvas
     home_page.place_forget()
-    daily_task_page.place_forget()
+    quiz_page.place_forget()
     ielts_page.place_forget()
     input_area.place(relx=0.0, rely=0.0, relheight=1, relwidth=0.41)
     # viet_label.place_forget()
     vocab_page.place(relx=0.0, rely=0, relheight=1, relwidth=1)
 
 
-def turn_on_daily_task_page():
+def turn_on_quiz_page():
     # forget unused canvas
     vocab_page.place_forget()
     home_page.place_forget()
     ielts_page.place_forget()
-    daily_task_page.place(relx=0.0, rely=0, relheight=1, relwidth=1)
+    quiz_page.place(relx=0.0, rely=0, relheight=1, relwidth=1)
 
 
 def turn_on_ielts_page():
     # forget unused canvas
     vocab_page.place_forget()
-    daily_task_page.place_forget()
+    quiz_page.place_forget()
     home_page.place_forget()
     ielts_page.place(relx=0.0, rely=0, relheight=1, relwidth=1)
 
@@ -84,7 +112,7 @@ def turn_on_ielts_page():
 # page declaration
 home_page = None
 vocab_page = None
-daily_task_page = None
+quiz_page = None
 ielts_page = None
 # st = Style()
 # st.configure('W.TButton', background='#345', foreground='black', font=('Arial', 14 ))
@@ -119,8 +147,8 @@ def create_page(main_canvas, text_string, current_page):
         nav_bar, 0, 0, "MAIN MENU", turn_on_home_page)
     vocab_nav_button = create_nav_button(
         nav_bar, 1/4, 0, "VOCABULARY", turn_on_vocab_page)
-    daily_task_nav_button = create_nav_button(
-        nav_bar, 1/2, 0, "DAILY TASK", turn_on_daily_task_page)
+    quiz_nav_button = create_nav_button(
+        nav_bar, 1/2, 0, "QUIZ", turn_on_quiz_page)
     ielts_nav_button = create_nav_button(
         nav_bar, 3/4, 0, "IELTS", turn_on_ielts_page)
     if current_page == "menu":
@@ -128,8 +156,8 @@ def create_page(main_canvas, text_string, current_page):
             background="#5E4388", foreground="#F7A7A6")
     elif current_page == "vocab":
         vocab_nav_button.configure(background="#5E4388", foreground="#F7A7A6")
-    elif current_page == "task":
-        daily_task_nav_button.configure(
+    elif current_page == "quiz":
+        quiz_nav_button.configure(
             background="#5E4388", foreground="#F7A7A6")
     elif current_page == "ielts":
         ielts_nav_button.configure(background="#5E4388", foreground="#F7A7A6")
@@ -139,7 +167,7 @@ def create_page(main_canvas, text_string, current_page):
 # page initialization
 home_page = create_page(main_canvas, "MAIN MENU", "menu")
 vocab_page = create_page(main_canvas, "VOCABULARY", "vocab")
-daily_task_page = create_page(main_canvas, "DAILY TASKS", "task")
+quiz_page = create_page(main_canvas, "QUIZ", "quiz")
 ielts_page = create_page(main_canvas, "IELTS", "ielts")
 
 ''' Main Menu '''
@@ -169,8 +197,8 @@ main_menu_big_button = create_big_button(
     home_page_body, 0.1, 0.1, "MAIN MENU", turn_on_home_page)
 vocab_big_button = create_big_button(
     home_page_body, 0.55, 0.1, "VOCABULARY", turn_on_vocab_page)
-daily_task_big_button = create_big_button(
-    home_page_body, 0.1, 0.55, "DAILY TASK", turn_on_daily_task_page)
+quiz_big_button = create_big_button(
+    home_page_body, 0.1, 0.55, "QUIZ", turn_on_quiz_page)
 ielts_big_button = create_big_button(
     home_page_body, 0.55, 0.55, "IELTS", turn_on_ielts_page)
 
@@ -189,13 +217,54 @@ input_area_header.place(relx=0.01, rely=0.01, relheight=0.07, relwidth=0.98)
 input_area_header.configure(
     font="-family {Comic Sans MS} -size 24 -weight bold", bg="#CBCAE6", foreground="#000000")
 
-input_label = Label(input_area, text="Type your word: ")
-input_label.place(relx=0.01, rely=0.1, relheight=0.05, relwidth=0.3)
-input_label.configure(
+# dictionary selection label (vocab page)
+vocab_dictionary_selection_label = Label(input_area, text="Choose your dictionary: ")
+vocab_dictionary_selection_label.place(relx=0.01, rely=0.1, relheight=0.05, relwidth=0.4)
+vocab_dictionary_selection_label.configure(
     font="-family {Comic Sans MS} -size 12", background="#CBCAE6", foreground="#000000", anchor=W)
 
-vocab_input = Text(input_area, font="-family {Comic Sans MS} -size 12")
-vocab_input.place(relx=0.3, rely=0.1, relheight=0.05, relwidth=0.5)
+# dictionary selection dropdown list (vocab page)
+vocab_dictionary_options = ['General English', 'Architecture dictionary', 'IELTS dictionary']
+vocab_dictionary_value = StringVar()
+vocab_dictionary_value.set('Choose your dictionary')
+vocab_dictionary_selection_dropdownlist = OptionMenu(
+    input_area, vocab_dictionary_value, *vocab_dictionary_options)
+vocab_dictionary_selection_dropdownlist.place(
+    relx=0.4, rely=0.1, relheight=0.05, relwidth=0.4)
+
+# scroll bar initialization (vocab page)
+vocab_scrollbar = Scrollbar(input_area)
+vocab_scrollbar.place_forget()
+# function to get the vocab list based on search option
+
+def generate_dictionary():
+    vocab_eng_chosen_dictionary = []
+    vocab_viet_chosen_dictionary = []
+    translate_button.config(state = NORMAL)
+    vocab_input_button.config(state = NORMAL)
+    vocab_input.config(state = NORMAL)
+    vocab_scrollbar.place(relx=0.9, rely=0.3, relheight=0.6, relwidth=0.05)
+    # initialize dictionaries
+    vocab_eng_chosen_dictionary, vocab_viet_chosen_dictionary = vocab_dictionary_selection(vocab_eng_chosen_dictionary, vocab_viet_chosen_dictionary)
+    vocab_list = Listbox(input_area, yscrollcommand=vocab_scrollbar.set)
+    vocab_list.config(font="-family {Comic Sans MS} -size 10")
+
+    for word in vocab_eng_chosen_dictionary:
+        vocab_list.insert(END, word[1])
+    vocab_list.place(relx=0.02, rely=0.3, relheight=0.6, relwidth=0.88)
+
+# button to generate a new dictionary in textbox (will display a new Listbox)
+dictionary_selection_button = Button(input_area, text="Generate",
+                            command=generate_dictionary, font="-family {Comic Sans MS} -size 9")
+dictionary_selection_button.place(relx=0.83, rely=0.1, relheight=0.05, relwidth=0.12)
+
+vocab_input_label = Label(input_area, text="Type your word: ")
+vocab_input_label.place(relx=0.01, rely=0.2, relheight=0.05, relwidth=0.4)
+vocab_input_label.configure(
+    font="-family {Comic Sans MS} -size 12", background="#CBCAE6", foreground="#000000", anchor=W)
+
+vocab_input = Entry(input_area, font="-family {Comic Sans MS} -size 12", state=DISABLED)
+vocab_input.place(relx=0.4, rely=0.2, relheight=0.05, relwidth=0.4)
 
 # dictionary initialization (vocab page)
 architecture_vocab_eng_list = ["architect", "architectural",
@@ -203,57 +272,64 @@ architecture_vocab_eng_list = ["architect", "architectural",
 architecture_vocab_viet_list = ["kiến trúc sư", "thuộc kiến trúc",
                                 "kiến trúc", "điều hòa không khí", "hoạt ảnh"]
 
-# scroll bar initialization (vocab page)
-scrollbar = Scrollbar(input_area)
-scrollbar.place(relx=0.9, rely=0.2, relheight=0.7, relwidth=0.05)
-
-# function to get the vocab list based on search option
-
-
 def get_value():
+    vocab_eng_chosen_dictionary = []
+    vocab_viet_chosen_dictionary = []
     search_vocab_eng_list = []
     search_text = vocab_input.get()
-    for text in architecture_vocab_eng_list:
-        if search_text in text:
-            search_vocab_eng_list.append(text)
+    search_text_len = len(search_text)
+    # initialize dictionaries
+    vocab_eng_chosen_dictionary, vocab_viet_chosen_dictionary = vocab_dictionary_selection(vocab_eng_chosen_dictionary, vocab_viet_chosen_dictionary)
+    for word in vocab_eng_chosen_dictionary:
+        if word[1][:search_text_len] == search_text:
+            search_vocab_eng_list.append(word[1])
 
-    vocab_list = Listbox(input_area, yscrollcommand=scrollbar.set)
+    vocab_list = Listbox(input_area, yscrollcommand=vocab_scrollbar.set)
+    vocab_list.config(font="-family {Comic Sans MS} -size 10")
+
     for word in search_vocab_eng_list:
         vocab_list.insert(END, word)
-    vocab_list.place(relx=0.02, rely=0.2, relheight=0.7, relwidth=0.88)
+    vocab_list.place(relx=0.02, rely=0.3, relheight=0.6, relwidth=0.88)
 
 
 # vocab search button (will display a new Listbox)
 vocab_input_button = Button(input_area, text="Search",
-                            command=get_value, font="-family {Comic Sans MS} -size 9")
-vocab_input_button.place(relx=0.85, rely=0.1, relheight=0.05, relwidth=0.1)
+                            command=get_value, font="-family {Comic Sans MS} -size 9", state = DISABLED)
+vocab_input_button.place(relx=0.83, rely=0.2, relheight=0.05, relwidth=0.12)
 
 # listbox initialization for the first time
-vocab_list = Listbox(input_area, yscrollcommand=scrollbar.set)
-for word in architecture_vocab_eng_list:
-    vocab_list.insert(END, word)
-vocab_list.place(relx=0.02, rely=0.2, relheight=0.7, relwidth=0.88)
+vocab_list = Listbox(input_area, yscrollcommand=vocab_scrollbar.set)
+vocab_list.config(font="-family {Comic Sans MS} -size 10")
 
 # display area in vocab page
-display_area = Canvas(vocab_page_body, bg="#CBCAE6", highlightthickness=0.5)
-display_area.place(relx=0.4, rely=0.0, relheight=1, relwidth=0.6)
+vocab_display_area = Canvas(vocab_page_body, bg="#CBCAE6", highlightthickness=0.5)
+vocab_display_area.place(relx=0.4, rely=0.0, relheight=1, relwidth=0.6)
 
 # function to display vietnamese word and image for the chosen english word
 
 
 def translate():
+    vocab_display_area.place(relx=0.4, rely=0.0, relheight=1, relwidth=0.6)
+    vocab_eng_chosen_dictionary = []
+    vocab_viet_chosen_dictionary = []
+    # initialize dictionaries
     try:
+        vocab_eng_chosen_dictionary, vocab_viet_chosen_dictionary = vocab_dictionary_selection(vocab_eng_chosen_dictionary, vocab_viet_chosen_dictionary)
         eng_word = vocab_list.selection_get()
-        index = architecture_vocab_eng_list.index(eng_word)
-        viet_word = architecture_vocab_eng_list[index]
-        viet_label = Label(display_area, text=viet_word,
-                           font="-family {Comic Sans MS} -size 12")
-        viet_label.place(relx=0.2, rely=0.8, relheight=0.1, relwidth=0.6)
-        vocab_display_frame = Frame(display_area, relief=RIDGE, borderwidth=1)
+        for word in vocab_eng_chosen_dictionary:
+            if word[1] == eng_word:
+                word_index = word[0]
+                break
+        viet_word = vocab_eng_chosen_dictionary[word_index-2][3]
+        viet_label = Label(vocab_display_area, text=viet_word, bg = '#CBCAE6', foreground='black',
+                            font="-family {Comic Sans MS} -size 12")
+        viet_label.place(relx=0, rely=0.8, relheight=0.1, relwidth=1)
+        vocab_display_frame = Frame(vocab_display_area, relief=RIDGE, borderwidth=1)
         vocab_display_frame.place(relx=0.2, rely=0.1, relheight=0.6, relwidth=0.6)
 
         # image display
-        img_path = str(index) + ".png"
+        # img_path = str(word_index) + ".png"
+        img_path = '1.png'
         vocab_display_first_image = (Image.open(img_path))
         resized_image= vocab_display_first_image.resize((430,400), Image.ANTIALIAS)
         vocab_display_image= ImageTk.PhotoImage(resized_image)
@@ -262,78 +338,77 @@ def translate():
         vocab_display_label.image = vocab_display_image
         vocab_display_label.configure(image=vocab_display_image)
 
-
-
-        # vocab_img_canvas = Canvas(display_area, bg='pink',highlightthickness=0.5)
+        # vocab_img_canvas = Canvas(vocab_display_area, bg='pink',highlightthickness=0.5)
         # vocab_img_canvas.place(relx=0.2, rely=0.1, relheight=0.6, relwidth=0.6)
         # img = ImageTk.PhotoImage(Image.open(img_path))
         # vocab_img_canvas.create_image(anchor=NW, image=img)
         # vocab_img_canvas.image = img
+
     except:
         pass
 
 
 # translate button (vocab page)
 translate_button = Button(input_area, text="Translate",
-                          command=translate, font="-family {Comic Sans MS} -size 9")
+                          command=translate, font="-family {Comic Sans MS} -size 9", state = DISABLED)
 translate_button.place(relx=0.8, rely=0.93, relheight=0.05, relwidth=0.15)
-# config between Listbox and scrollbar
-scrollbar.config(command=vocab_list.yview)
+# config between Listbox and vocab_scrollbar
+vocab_scrollbar.config(command=vocab_list.yview)
 
-'''Daily-tasks page'''
-# dailytask page body
-dailytask_page_body = Canvas(daily_task_page, bg="#CBCAE6", highlightthickness=0.5)
-dailytask_page_body.place(relx=0.0, rely=0.2, relheight=0.8, relwidth=1.0)
+'''Quiz page'''
+# quiz page body
+quiz_page_body = Canvas(quiz_page, bg="#CBCAE6", highlightthickness=0.5)
+quiz_page_body.place(relx=0.0, rely=0.2, relheight=0.8, relwidth=1.0)
 
-# dailytask selection area
-dailytask_selection_area = Canvas(dailytask_page_body, bg="#CBCAE6", highlightthickness=0.5)
-dailytask_selection_area.place(relx=0.0, rely=0.0, relheight=1, relwidth=0.31)
+# quiz selection area
+quiz_selection_area = Canvas(quiz_page_body, bg="#CBCAE6", highlightthickness=0.5)
+quiz_selection_area.place(relx=0.0, rely=0.0, relheight=1, relwidth=0.31)
 
-# dailytask display area
-dailytask_display_area = Canvas(dailytask_page_body, bg="#CBCAE6", highlightthickness=0.5)
-dailytask_display_area.place(relx=0.3, rely=0.0, relheight=1, relwidth=0.7)
+# quiz display area
+quiz_display_area = Canvas(quiz_page_body, bg="#CBCAE6", highlightthickness=0.5)
+quiz_display_area.place(relx=0.3, rely=0.0, relheight=1, relwidth=0.7)
 
 # setting area (in selection area)
-dailytask_setting_area = Canvas(dailytask_selection_area, bg="#CBCAE6", highlightthickness=0.5)
-dailytask_setting_area.place(relx=0.0, rely=0.0, relheight=0.41, relwidth=1)
+quiz_setting_area = Canvas(quiz_selection_area, bg="#CBCAE6", highlightthickness=0.5)
+quiz_setting_area.place(relx=0.0, rely=0.0, relheight=0.41, relwidth=1)
 
 # customization area (in selection area)
-dailytask_customization_area = Canvas(dailytask_selection_area, bg="#CBCAE6", highlightthickness=0.5)
-dailytask_customization_area.place(
+quiz_customization_area = Canvas(quiz_selection_area, bg="#CBCAE6", highlightthickness=0.5)
+quiz_customization_area.place(
     relx=0.0, rely=0.4, relheight=0.6, relwidth=1)
 
 # setting area header
-dailytask_setting_area_header = Label(
-    dailytask_setting_area, text="Setting", bd=0, relief=RIDGE, anchor=CENTER,
+quiz_setting_area_header = Label(
+    quiz_setting_area, text="Setting", bd=0, relief=RIDGE, anchor=CENTER,
     font="-family {Comic Sans MS} -size 24 -weight bold", bg="#CBCAE6", foreground="#000000")
-dailytask_setting_area_header.place(
+quiz_setting_area_header.place(
     relx=0.01, rely=0.01, relheight=0.18, relwidth=0.98)
 
-eng_chosen_dictionary = []
-viet_chosen_dictionary = []
+quiz_eng_chosen_dictionary = []
+quiz_viet_chosen_dictionary = []
 number_of_ques = 0
 
 # dictionary selection
 # label
 dictionary_selection_label = Label(
-    dailytask_setting_area, text="Select your dictionary:", bd=0, relief=RIDGE, anchor=W,
+    quiz_setting_area, text="Select your dictionary:", bd=0, relief=RIDGE, anchor=W,
     font="-family {Comic Sans MS} -size 12", bg="#CBCAE6", foreground="#000000")
 dictionary_selection_label.place(
     relx=0.01, rely=0.25, relheight=0.15, relwidth=0.5)
 
 # option menu
-dictionary_options = ['Architecture dictionary', 'IELTS dictionary']
-dictionary_value = StringVar()
-dictionary_value.set('Choose your dictionary')
-dictionary_selection_dropdownlist = OptionMenu(
-    dailytask_setting_area, dictionary_value, *dictionary_options)
-dictionary_selection_dropdownlist.place(
+quiz_dictionary_options = ['General English', 'Architecture dictionary', 'IELTS dictionary']
+quiz_dictionary_value = StringVar()
+quiz_dictionary_value.set('Choose your dictionary')
+quiz_dictionary_selection_dropdownlist = OptionMenu(
+    quiz_setting_area, quiz_dictionary_value, *quiz_dictionary_options)
+quiz_dictionary_selection_dropdownlist.place(
     relx=0.5, rely=0.25, relheight=0.15, relwidth=0.45)
 
 # number of ques selection
 # label
 number_of_ques_label = Label(
-    dailytask_setting_area, text="Number of questions:", bd=0, relief=RIDGE, anchor=W,
+    quiz_setting_area, text="Number of questions:", bd=0, relief=RIDGE, anchor=W,
     font="-family {Comic Sans MS} -size 12", bg="#CBCAE6", foreground="#000000")
 number_of_ques_label.place(
     relx=0.01, rely=0.5, relheight=0.15, relwidth=0.5)
@@ -345,35 +420,31 @@ for i in range(1, 21):
 number_of_ques_value = StringVar()
 number_of_ques_value.set('Number of questions')
 number_of_ques_dropdownlist = OptionMenu(
-    dailytask_setting_area, number_of_ques_value, *number_of_ques_options)
+    quiz_setting_area, number_of_ques_value, *number_of_ques_options)
 number_of_ques_dropdownlist.place(
     relx=0.5, rely=0.5, relheight=0.15, relwidth=0.45)
 
-eng_chosen_dictionary = []
-viet_chosen_dictionary = []
-number_of_ques = 0
-
 # label "Quiz"
-dailytask_quiz_label = Label(
-    dailytask_display_area, text="Quiz", bd=0, relief=RIDGE, anchor=CENTER,
+quiz_quiz_label = Label(
+    quiz_display_area, text="Quiz", bd=0, relief=RIDGE, anchor=CENTER,
     font="-family {Comic Sans MS} -size 24 -weight bold", bg="#CBCAE6", foreground="#000000", highlightthickness=0.5)
-dailytask_quiz_label.place(
+quiz_quiz_label.place(
     relx=0.01, rely=0, relheight=0.09, relwidth=0.5)
 
 # canvas to store all question buttons
-dailytask_question_canvas = Canvas(dailytask_display_area, bg="#CBCAE6", highlightthickness=0.5)
-dailytask_question_canvas.place(relx=0.5, rely=0, relheight=0.1, relwidth=0.5)
+quiz_question_canvas = Canvas(quiz_display_area, bg="#CBCAE6", highlightthickness=0.5)
+quiz_question_canvas.place(relx=0.5, rely=0, relheight=0.1, relwidth=0.5)
 
 # big canvas for doing quiz
-dailytask_quiz_area = Canvas(dailytask_display_area, bg="#CBCAE6", highlightthickness=0.5)
-dailytask_quiz_area.place(relx=0, rely=0.1, relheight=0.9, relwidth=1)
+quiz_quiz_area = Canvas(quiz_display_area, bg="#CBCAE6", highlightthickness=0.5)
+quiz_quiz_area.place(relx=0, rely=0.1, relheight=0.9, relwidth=1)
 
 # canvas to fill in quiz
-vocab_quiz_fillin_area = Canvas(dailytask_quiz_area, bg="#CBCAE6", highlightthickness=0.5)
+vocab_quiz_fillin_area = Canvas(quiz_quiz_area, bg="#CBCAE6", highlightthickness=0.5)
 vocab_quiz_fillin_area.place(relx=0, rely=0, relheight=0.7, relwidth=0.5)
 
 # canvas to show the image which represent the quiz-word
-vocab_quiz_image_area = Canvas(dailytask_quiz_area, bg="#CBCAE6", highlightthickness=0.5)
+vocab_quiz_image_area = Canvas(quiz_quiz_area, bg="#CBCAE6", highlightthickness=0.5)
 vocab_quiz_image_area.place(relx=0.5, rely=0, relheight=0.7, relwidth=0.5)
 
 # canvas to store all entrybox for the quiz
@@ -407,15 +478,18 @@ def limit_text(text):
     if len(value) > 2: text.set(value[:1])
 
 # function to generate the quiz after user select a quiz
-def generate_question(x, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary):
+def generate_question(x, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary):
     quiz_image_frame = Frame(vocab_quiz_image_area, relief=RIDGE, borderwidth=1)
     quiz_image_frame.place(relx=0, rely=0, relheight=1, relwidth=1)
 
     # image display quiz
     quiz_word = eng_random_vocab_list[x]
-    index = eng_chosen_dictionary.index(quiz_word)
-
-    quiz_img_path = str(index) + ".png"
+    for word in quiz_eng_chosen_dictionary:
+        if word[1] == quiz_word:
+            index = word[0]
+            break
+    # quiz_img_path = str(index) + ".png"
+    quiz_img_path = "1.png"
     quiz_display_first_image = (Image.open(quiz_img_path))
     resized_image= quiz_display_first_image.resize((430,400), Image.ANTIALIAS)
     quiz_display_image= ImageTk.PhotoImage(resized_image)
@@ -424,10 +498,10 @@ def generate_question(x, eng_random_vocab_list, viet_random_vocab_list, eng_chos
     quiz_display_label.image = quiz_display_image
     quiz_display_label.configure(image=quiz_display_image)
 
-    dailytask_quiz_label = Label(
-        dailytask_display_area, text="Question " + str(x + 1), bd=0, relief=RIDGE, anchor=CENTER,
+    quiz_quiz_label = Label(
+        quiz_display_area, text="Question " + str(x + 1), bd=0, relief=RIDGE, anchor=CENTER,
         font="-family {Comic Sans MS} -size 24 -weight bold", bg="#CBCAE6", foreground="#000000", highlightthickness=0.5)
-    dailytask_quiz_label.place(
+    quiz_quiz_label.place(
         relx=0.01, rely=0.01, relheight=0.08, relwidth=0.48)
     quiz_string = ""
     quiz_word_char_list = []
@@ -442,7 +516,7 @@ def generate_question(x, eng_random_vocab_list, viet_random_vocab_list, eng_chos
     quiz_number_of_character = len(quiz_word_char_list)
     for i in range(3):
         index = random.randint(0, len(quiz_word_char_list)-1)
-        if not index in index_to_pop_list:
+        if not index in index_to_pop_list and quiz_word_char_list[index] != ' ':
             index_to_pop_list.append(index)
     
     for idx in index_to_pop_list:
@@ -468,83 +542,83 @@ def generate_question(x, eng_random_vocab_list, viet_random_vocab_list, eng_chos
 
 
 # initiator all question buttons
-number1_ques_button = Button(dailytask_question_canvas, text="1",
+number1_ques_button = Button(quiz_question_canvas, text="1",
                                  font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number1_ques_button.place(relx=0, rely=0, relheight=0.5, relwidth=0.1)
 
-number2_ques_button = Button(dailytask_question_canvas, text="2",
+number2_ques_button = Button(quiz_question_canvas, text="2",
                                 font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number2_ques_button.place(relx=0.1, rely=0, relheight=0.5, relwidth=0.1)
 
-number3_ques_button = Button(dailytask_question_canvas, text="3",
+number3_ques_button = Button(quiz_question_canvas, text="3",
                                 font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number3_ques_button.place(relx=0.2, rely=0, relheight=0.5, relwidth=0.1)
 
-number4_ques_button = Button(dailytask_question_canvas, text="4",
+number4_ques_button = Button(quiz_question_canvas, text="4",
                                 font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number4_ques_button.place(relx=0.3, rely=0, relheight=0.5, relwidth=0.1)
 
-number5_ques_button = Button(dailytask_question_canvas, text="5",
+number5_ques_button = Button(quiz_question_canvas, text="5",
                                 font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number5_ques_button.place(relx=0.4, rely=0, relheight=0.5, relwidth=0.1)
 
-number6_ques_button = Button(dailytask_question_canvas, text="6",
+number6_ques_button = Button(quiz_question_canvas, text="6",
                                 font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number6_ques_button.place(relx=0.5, rely=0, relheight=0.5, relwidth=0.1)
 
-number7_ques_button = Button(dailytask_question_canvas, text="7",
+number7_ques_button = Button(quiz_question_canvas, text="7",
                                 font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number7_ques_button.place(relx=0.6, rely=0, relheight=0.5, relwidth=0.1)
 
-number8_ques_button = Button(dailytask_question_canvas, text="8",
+number8_ques_button = Button(quiz_question_canvas, text="8",
                                 font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number8_ques_button.place(relx=0.7, rely=0, relheight=0.5, relwidth=0.1)
 
-number9_ques_button = Button(dailytask_question_canvas, text="9",
+number9_ques_button = Button(quiz_question_canvas, text="9",
                                 font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number9_ques_button.place(relx=0.8, rely=0, relheight=0.5, relwidth=0.1)
 
-number10_ques_button = Button(dailytask_question_canvas, text="10",
+number10_ques_button = Button(quiz_question_canvas, text="10",
                                 font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number10_ques_button.place(relx=0.9, rely=0, relheight=0.5, relwidth=0.1)
 
-number11_ques_button = Button(dailytask_question_canvas, text="11",
+number11_ques_button = Button(quiz_question_canvas, text="11",
                                 font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number11_ques_button.place(relx=0, rely=0.5, relheight=0.5, relwidth=0.1)
 
-number12_ques_button = Button(dailytask_question_canvas, text="12",
+number12_ques_button = Button(quiz_question_canvas, text="12",
                                 font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number12_ques_button.place(relx=0.1, rely=0.5, relheight=0.5, relwidth=0.1)
 
-number13_ques_button = Button(dailytask_question_canvas, text="13",
+number13_ques_button = Button(quiz_question_canvas, text="13",
                                 font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number13_ques_button.place(relx=0.2, rely=0.5, relheight=0.5, relwidth=0.1)
 
-number14_ques_button = Button(dailytask_question_canvas, text="14",
+number14_ques_button = Button(quiz_question_canvas, text="14",
                                 font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number14_ques_button.place(relx=0.3, rely=0.5, relheight=0.5, relwidth=0.1)
 
-number15_ques_button = Button(dailytask_question_canvas, text="15",
+number15_ques_button = Button(quiz_question_canvas, text="15",
                                 font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number15_ques_button.place(relx=0.4, rely=0.5, relheight=0.5, relwidth=0.1)
 
-number16_ques_button = Button(dailytask_question_canvas, text="16",
+number16_ques_button = Button(quiz_question_canvas, text="16",
                                 font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number16_ques_button.place(relx=0.5, rely=0.5, relheight=0.5, relwidth=0.1)
 
-number17_ques_button = Button(dailytask_question_canvas, text="17",
+number17_ques_button = Button(quiz_question_canvas, text="17",
                                 font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number17_ques_button.place(relx=0.6, rely=0.5, relheight=0.5, relwidth=0.1)
 
-number18_ques_button = Button(dailytask_question_canvas, text="18",
+number18_ques_button = Button(quiz_question_canvas, text="18",
                                 font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number18_ques_button.place(relx=0.7, rely=0.5, relheight=0.5, relwidth=0.1)
 
-number19_ques_button = Button(dailytask_question_canvas, text="19",
+number19_ques_button = Button(quiz_question_canvas, text="19",
                                 font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number19_ques_button.place(relx=0.8, rely=0.5, relheight=0.5, relwidth=0.1)
 
-number20_ques_button = Button(dailytask_question_canvas, text="20",
+number20_ques_button = Button(quiz_question_canvas, text="20",
                                 font="-family {Comic Sans MS} -size 9", state=DISABLED)
 number20_ques_button.place(relx=0.9, rely=0.5, relheight=0.5, relwidth=0.1)
 
@@ -552,107 +626,116 @@ number20_ques_button.place(relx=0.9, rely=0.5, relheight=0.5, relwidth=0.1)
 original_bg_color = number1_ques_button.cget("background")
 original_fore_color = number1_ques_button.cget("foreground")
 
+quiz_question_button_list = [number1_ques_button, number2_ques_button, number3_ques_button, number4_ques_button, number5_ques_button,
+        number6_ques_button, number7_ques_button, number8_ques_button, number9_ques_button, number10_ques_button,
+        number11_ques_button, number12_ques_button, number13_ques_button, number14_ques_button, number15_ques_button,
+        number16_ques_button, number17_ques_button, number18_ques_button, number19_ques_button, number20_ques_button]
+
 # function to generate question bar after user click "Generate quiz"
-def generate_question_bar(eng_random_vocab_list, viet_random_vocab_list, number_of_ques, eng_chosen_dictionary):
+def generate_question_bar(eng_random_vocab_list, viet_random_vocab_list, number_of_ques, quiz_eng_chosen_dictionary):
     ques_index = 0
-    dailytask_question_button_list = [number1_ques_button, number2_ques_button, number3_ques_button, number4_ques_button, number5_ques_button,
+    quiz_question_button_list = [number1_ques_button, number2_ques_button, number3_ques_button, number4_ques_button, number5_ques_button,
             number6_ques_button, number7_ques_button, number8_ques_button, number9_ques_button, number10_ques_button,
             number11_ques_button, number12_ques_button, number13_ques_button, number14_ques_button, number15_ques_button,
             number16_ques_button, number17_ques_button, number18_ques_button, number19_ques_button, number20_ques_button]
     
     number1_ques_button.config(command=lambda: generate_question(
-                                0, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
+                                0, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary))
 
     number2_ques_button.config(command=lambda: generate_question(
-                                1, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
+                                1, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary))
                                 
     number3_ques_button.config(command=lambda: generate_question(
-                                2, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
+                                2, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary))
                                 
     number4_ques_button.config(command=lambda: generate_question(
-                                3, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
+                                3, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary))
                                 
     number5_ques_button.config(command=lambda: generate_question(
-                                4, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
+                                4, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary))
                                 
     number6_ques_button.config(command=lambda: generate_question(
-                                5, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
+                                5, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary))
                                 
     number7_ques_button.config(command=lambda: generate_question(
-                                6, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
+                                6, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary))
                                 
     number8_ques_button.config(command=lambda: generate_question(
-                                7, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
+                                7, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary))
                                 
     number9_ques_button.config(command=lambda: generate_question(
-                                8, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
+                                8, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary))
                                 
     number10_ques_button.config(command=lambda: generate_question(
-                                9, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
+                                9, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary))
                                 
     number11_ques_button.config(command=lambda: generate_question(
-                                10, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
+                                10, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary))
                                 
     number12_ques_button.config(command=lambda: generate_question(
-                                11, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
+                                11, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary))
                                 
     number13_ques_button.config(command=lambda: generate_question(
-                                12, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
+                                12, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary))
                                 
     number14_ques_button.config(command=lambda: generate_question(
-                                13, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
+                                13, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary))
                                 
     number15_ques_button.config(command=lambda: generate_question(
-                                14, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
+                                14, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary))
                                 
     number16_ques_button.config(command=lambda: generate_question(
-                                15, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
+                                15, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary))
                                 
     number17_ques_button.config(command=lambda: generate_question(
-                                16, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
+                                16, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary))
                                 
     number18_ques_button.config(command=lambda: generate_question(
-                                17, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
+                                17, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary))
                                 
     number19_ques_button.config(command=lambda: generate_question(
-                                18, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
+                                18, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary))
                                 
     number20_ques_button.config(command=lambda: generate_question(
-                                19, eng_random_vocab_list, viet_random_vocab_list, eng_chosen_dictionary))
+                                19, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary))
 
     # reset config of button in question bar
     for i in range(20):
-        dailytask_question_button_list[i].config(state=DISABLED, background=original_bg_color, foreground=original_fore_color)
+        quiz_question_button_list[i].config(state=DISABLED, background=original_bg_color, foreground=original_fore_color)
     for i in range(number_of_ques):
-        dailytask_question_button_list[i].config(state=NORMAL, background="#F7A7A6", foreground="#5E4388")
+        quiz_question_button_list[i].config(state=NORMAL, background="#F7A7A6", foreground="#5E4388")
        
 
 
 def generate_quiz():
     eng_random_vocab_list = []
     viet_random_vocab_list = []
-    number_of_ques = int(number_of_ques_value.get())
     # number_of_ques = int(number_of_ques)
-    if dictionary_value.get() == 'Architecture dictionary':
-        eng_chosen_dictionary = architecture_vocab_eng_list.copy()
-        viet_chosen_dictionary = architecture_vocab_viet_list.copy()
+    if quiz_dictionary_value.get() == 'General English':
+        quiz_eng_chosen_dictionary = generate_db("general_english.db", "av")
+        quiz_viet_chosen_dictionary = generate_db("general_english.db", "va")
+    elif quiz_dictionary_value.get() == 'Architecture dictionary':
+        quiz_eng_chosen_dictionary = architecture_vocab_eng_list.copy()
+        quiz_viet_chosen_dictionary = architecture_vocab_viet_list.copy()
     else:
         pass
-    random_index_list = random.sample(range(0, len(architecture_vocab_eng_list)), number_of_ques)
-    for i in random_index_list:
-        eng_random_vocab_list.append(architecture_vocab_eng_list[i])
-        viet_random_vocab_list.append(architecture_vocab_viet_list[i])
-    generate_question_bar(eng_random_vocab_list, viet_random_vocab_list, number_of_ques, eng_chosen_dictionary)
+    try:
+        number_of_ques = int(number_of_ques_value.get())
+        random_index_list = random.sample(range(0, len(quiz_eng_chosen_dictionary)), number_of_ques)
+        for i in random_index_list:
+            eng_random_vocab_list.append(quiz_eng_chosen_dictionary[i][1])
+            viet_random_vocab_list.append(quiz_eng_chosen_dictionary[i][3])
+        generate_question_bar(eng_random_vocab_list, viet_random_vocab_list, number_of_ques, quiz_eng_chosen_dictionary)
+    except:
+        pass
 
 
 # button to generate quiz (based on above setting)
-dailytask_selection_setting_generate_button = Button(dailytask_setting_area, text="Generate quiz",
+quiz_selection_setting_generate_button = Button(quiz_setting_area, text="Generate quiz",
                                                      font="-family {Comic Sans MS} -size 12", command=generate_quiz)
-dailytask_selection_setting_generate_button.place(
+quiz_selection_setting_generate_button.place(
     relx=0.5, rely=0.75, relheight=0.15, relwidth=0.45)
 
-vocab_input = Text(dailytask_display_area,
-                   font="-family {Comic Sans MS} -size 14 -weight bold")
 # vocab_input.place(relx=0.3, rely=0.1, relheight=0.05, relwidth=0.03)
 
 turn_on_home_page()
