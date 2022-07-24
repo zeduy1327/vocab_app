@@ -429,7 +429,7 @@ quiz_quiz_label = Label(
     quiz_display_area, text="Quiz", bd=0, relief=RIDGE, anchor=CENTER,
     font="-family {Comic Sans MS} -size 24 -weight bold", bg="#CBCAE6", foreground="#000000", highlightthickness=0.5)
 quiz_quiz_label.place(
-    relx=0.01, rely=0, relheight=0.09, relwidth=0.5)
+    relx=0.0, rely=0, relheight=0.1, relwidth=0.5)
 
 # canvas to store all question buttons
 quiz_question_canvas = Canvas(quiz_display_area, bg="#CBCAE6", highlightthickness=0.5)
@@ -502,7 +502,7 @@ def generate_question(x, eng_random_vocab_list, viet_random_vocab_list, quiz_eng
         quiz_display_area, text="Question " + str(x + 1), bd=0, relief=RIDGE, anchor=CENTER,
         font="-family {Comic Sans MS} -size 24 -weight bold", bg="#CBCAE6", foreground="#000000", highlightthickness=0.5)
     quiz_quiz_label.place(
-        relx=0.01, rely=0.01, relheight=0.08, relwidth=0.48)
+        relx=0, rely=0, relheight=0.1, relwidth=0.5)
     quiz_string = ""
     quiz_word_char_list = []
     index_to_pop_list = []
