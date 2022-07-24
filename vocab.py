@@ -436,15 +436,15 @@ quiz_question_canvas = Canvas(quiz_display_area, bg="#CBCAE6", highlightthicknes
 quiz_question_canvas.place(relx=0.5, rely=0, relheight=0.1, relwidth=0.5)
 
 # big canvas for doing quiz
-quiz_quiz_area = Canvas(quiz_display_area, bg="#CBCAE6", highlightthickness=0.5)
-quiz_quiz_area.place(relx=0, rely=0.1, relheight=0.9, relwidth=1)
+quiz_area = Canvas(quiz_display_area, bg="#CBCAE6", highlightthickness=0.5)
+quiz_area.place(relx=0, rely=0.1, relheight=0.9, relwidth=1)
 
 # canvas to fill in quiz
-vocab_quiz_fillin_area = Canvas(quiz_quiz_area, bg="#CBCAE6", highlightthickness=0.5)
+vocab_quiz_fillin_area = Canvas(quiz_area, bg="#CBCAE6", highlightthickness=0.5)
 vocab_quiz_fillin_area.place(relx=0, rely=0, relheight=0.7, relwidth=0.5)
 
 # canvas to show the image which represent the quiz-word
-vocab_quiz_image_area = Canvas(quiz_quiz_area, bg="#CBCAE6", highlightthickness=0.5)
+vocab_quiz_image_area = Canvas(quiz_area, bg="#CBCAE6", highlightthickness=0.5)
 vocab_quiz_image_area.place(relx=0.5, rely=0, relheight=0.7, relwidth=0.5)
 
 # canvas to store all entrybox for the quiz
@@ -477,6 +477,61 @@ def limit_text(text):
     value = text.get()
     if len(value) > 2: text.set(value[:1])
 
+quiz_mcq_area = Canvas(quiz_area, bg="#CBCAE6", highlightthickness=0.5)
+quiz_mcq_area.place(relx=0, rely=0.7, relheight=0.3, relwidth=1)
+
+def create_mcq(viet_translated_word):
+    quiz_eng_chosen_dictionary = []
+    quiz_viet_chosen_dictionary = []
+    # number_of_ques = int(number_of_ques)
+    if quiz_dictionary_value.get() == 'General English':
+        quiz_eng_chosen_dictionary = generate_db("general_english.db", "av")
+        quiz_viet_chosen_dictionary = generate_db("general_english.db", "va")
+    elif quiz_dictionary_value.get() == 'Architecture dictionary':
+        quiz_eng_chosen_dictionary = architecture_vocab_eng_list.copy()
+        quiz_viet_chosen_dictionary = architecture_vocab_viet_list.copy()
+    else:
+        pass
+    mcq_pool_word = []
+    mcq_pool_idx = random.sample(range(0, len(quiz_eng_chosen_dictionary)), 2)
+    for idx in mcq_pool_idx:
+        mcq_pool_word.append(quiz_eng_chosen_dictionary[idx][3])
+    correct_index = random.randint(1, 3)
+    if correct_index == 1:
+        mcq_pool_word.insert(0, viet_translated_word)
+    elif correct_index == 2:
+        mcq_pool_word.insert(1, viet_translated_word)
+    elif correct_index == 3:
+        mcq_pool_word.insert(2, viet_translated_word)
+
+    buttonA = Button(quiz_mcq_area, text="A. " + mcq_pool_word[0], font="-family {Comic Sans MS} -size 12", anchor = W)
+    buttonA.place(relx=0.1, rely=0.1, relheight=0.2, relwidth=0.8)
+    buttonB = Button(quiz_mcq_area, text="B. " + mcq_pool_word[1], font="-family {Comic Sans MS} -size 12", anchor = W)
+    buttonB.place(relx=0.1, rely=0.4, relheight=0.2, relwidth=0.8)
+    buttonC = Button(quiz_mcq_area, text="C. " + mcq_pool_word[2], font="-family {Comic Sans MS} -size 12", anchor = W)
+    buttonC.place(relx=0.1, rely=0.7, relheight=0.2, relwidth=0.8)
+
+def check_fillin_quiz(new_textbox_list, quiz_word, viet_translated_word):
+    string_to_compare = ''
+    text_display = ''
+    color = ''
+    for textbox in new_textbox_list:
+        string_to_compare += textbox.get("1.0")
+    if string_to_compare == quiz_word:
+        text_display = 'Correct ✔'
+        color = 'green'
+        create_mcq(viet_translated_word)
+    else:
+        text_display = 'Wrong ✖'
+        color = 'red'
+        create_mcq(viet_translated_word)
+    result_label = Label(
+        vocab_quiz_fillin_area, text=text_display, bd=0, relief=RIDGE, anchor=W,
+        font="-family {Comic Sans MS} -size 20", bg="#CBCAE6", foreground=color)
+    result_label.place(
+        relx=0.2, rely=0.7, relheight=0.2, relwidth=0.6)
+    
+
 # function to generate the quiz after user select a quiz
 def generate_question(x, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary):
     quiz_image_frame = Frame(vocab_quiz_image_area, relief=RIDGE, borderwidth=1)
@@ -489,6 +544,7 @@ def generate_question(x, eng_random_vocab_list, viet_random_vocab_list, quiz_eng
             index = word[0]
             break
     # quiz_img_path = str(index) + ".png"
+    viet_translated_word = quiz_eng_chosen_dictionary[index-2][3]
     quiz_img_path = "1.png"
     quiz_display_first_image = (Image.open(quiz_img_path))
     resized_image= quiz_display_first_image.resize((430,400), Image.ANTIALIAS)
@@ -515,9 +571,9 @@ def generate_question(x, eng_random_vocab_list, viet_random_vocab_list, quiz_eng
     
     quiz_number_of_character = len(quiz_word_char_list)
     for i in range(3):
-        index = random.randint(0, len(quiz_word_char_list)-1)
-        if not index in index_to_pop_list and quiz_word_char_list[index] != ' ':
-            index_to_pop_list.append(index)
+        random_index = random.randint(0, len(quiz_word_char_list)-1)
+        if not random_index in index_to_pop_list and quiz_word_char_list[random_index] != ' ':
+            index_to_pop_list.append(random_index)
     
     for idx in index_to_pop_list:
         quiz_word_char_list[idx] = ''
@@ -539,6 +595,10 @@ def generate_question(x, eng_random_vocab_list, viet_random_vocab_list, quiz_eng
             textbox.insert(END, quiz_word_char_list[idx])
         if quiz_word_char_list[idx] == '':
             textbox.config(fg ='red')
+
+    quiz_fillin_check_button = Button(vocab_quiz_fillin_area, text="Check", font="-family {Comic Sans MS} -size 12", command = lambda: check_fillin_quiz(new_textbox_list, quiz_word, viet_translated_word))
+    quiz_fillin_check_button.place(relx=0.75, rely=0.5, relheight=0.1, relwidth=0.2)
+    
 
 
 # initiator all question buttons
