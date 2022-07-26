@@ -255,7 +255,8 @@ def generate_dictionary():
 
 # button to generate a new dictionary in textbox (will display a new Listbox)
 dictionary_selection_button = Button(input_area, text="Generate",
-                            command=generate_dictionary, font="-family {Comic Sans MS} -size 9")
+                            command=generate_dictionary, font="-family {Comic Sans MS} -size 9",
+                            background="#5E4388", foreground="#F7A7A6", activebackground="black", activeforeground="pink")
 dictionary_selection_button.place(relx=0.83, rely=0.1, relheight=0.05, relwidth=0.12)
 
 vocab_input_label = Label(input_area, text="Type your word: ")
@@ -294,7 +295,8 @@ def get_value():
 
 # vocab search button (will display a new Listbox)
 vocab_input_button = Button(input_area, text="Search",
-                            command=get_value, font="-family {Comic Sans MS} -size 9", state = DISABLED)
+                            command=get_value, font="-family {Comic Sans MS} -size 9", state = DISABLED,
+                            background="#5E4388", foreground="#F7A7A6", activebackground="black", activeforeground="pink")
 vocab_input_button.place(relx=0.83, rely=0.2, relheight=0.05, relwidth=0.12)
 
 # listbox initialization for the first time
@@ -318,9 +320,9 @@ def translate():
         eng_word = vocab_list.selection_get()
         for word in vocab_eng_chosen_dictionary:
             if word[1] == eng_word:
-                word_index = word[0]
+                vocab_word_index = word[0]
                 break
-        viet_word = vocab_eng_chosen_dictionary[word_index-2][3]
+        viet_word = vocab_eng_chosen_dictionary[vocab_word_index-2][3]
         viet_label = Label(vocab_display_area, text=viet_word, bg = '#CBCAE6', foreground='black',
                             font="-family {Comic Sans MS} -size 12")
         viet_label.place(relx=0, rely=0.8, relheight=0.1, relwidth=1)
@@ -329,10 +331,13 @@ def translate():
 
         # image display
         # img_path = str(word_index) + ".png"
-        img_path = '1.png'
-        vocab_display_first_image = (Image.open(img_path))
-        resized_image= vocab_display_first_image.resize((430,400), Image.ANTIALIAS)
-        vocab_display_image= ImageTk.PhotoImage(resized_image)
+        vocab_img_path = 'general_english_images/' + str(vocab_word_index) + '.png'
+        try:
+            vocab_display_first_image = (Image.open(vocab_img_path))
+        except:
+            vocab_display_first_image = (Image.open('general_english_images/0.png'))
+        vocab_resized_image= vocab_display_first_image.resize((430,400), Image.ANTIALIAS)
+        vocab_display_image= ImageTk.PhotoImage(vocab_resized_image)
         vocab_display_label = Label(vocab_display_frame)
         vocab_display_label.place(relx=0, rely=0, relheight=1, relwidth=1)
         vocab_display_label.image = vocab_display_image
@@ -350,7 +355,8 @@ def translate():
 
 # translate button (vocab page)
 translate_button = Button(input_area, text="Translate",
-                          command=translate, font="-family {Comic Sans MS} -size 9", state = DISABLED)
+                          command=translate, font="-family {Comic Sans MS} -size 9", state = DISABLED,
+                          background="#5E4388", foreground="#F7A7A6", activebackground="black", activeforeground="pink")
 translate_button.place(relx=0.8, rely=0.93, relheight=0.05, relwidth=0.15)
 # config between Listbox and vocab_scrollbar
 vocab_scrollbar.config(command=vocab_list.yview)
@@ -376,6 +382,13 @@ quiz_setting_area.place(relx=0.0, rely=0.0, relheight=0.41, relwidth=1)
 quiz_customization_area = Canvas(quiz_selection_area, bg="#CBCAE6", highlightthickness=0.5)
 quiz_customization_area.place(
     relx=0.0, rely=0.4, relheight=0.6, relwidth=1)
+
+# cuztomization area header
+quiz_cuztomization_area_header = Label(
+    quiz_customization_area, text="Customization", bd=0, relief=RIDGE, anchor=CENTER,
+    font="-family {Comic Sans MS} -size 24 -weight bold", bg="#CBCAE6", foreground="#000000")
+quiz_cuztomization_area_header.place(
+    relx=0.01, rely=0.01, relheight=0.18, relwidth=0.98)
 
 # setting area header
 quiz_setting_area_header = Label(
@@ -426,10 +439,10 @@ number_of_ques_dropdownlist.place(
 
 # label "Quiz"
 quiz_quiz_label = Label(
-    quiz_display_area, text="Quiz", bd=0, relief=RIDGE, anchor=CENTER,
+    quiz_display_area, text="Quiz", bd=0, relief=RIDGE, anchor=N,
     font="-family {Comic Sans MS} -size 24 -weight bold", bg="#CBCAE6", foreground="#000000", highlightthickness=0.5)
 quiz_quiz_label.place(
-    relx=0.0, rely=0, relheight=0.1, relwidth=0.5)
+    relx=0.01, rely=0.01, relheight=0.09, relwidth=0.49)
 
 # canvas to store all question buttons
 quiz_question_canvas = Canvas(quiz_display_area, bg="#CBCAE6", highlightthickness=0.5)
@@ -480,6 +493,19 @@ def limit_text(text):
 quiz_mcq_area = Canvas(quiz_area, bg="#CBCAE6", highlightthickness=0.5)
 quiz_mcq_area.place(relx=0, rely=0.7, relheight=0.3, relwidth=1)
 
+def check_mcq(text_in_button, result):
+    if text_in_button == result:
+        text_display = '✔'
+        color = 'green'
+    else:
+        text_display = '✖'
+        color = 'red'
+    
+    quiz_result_label = Label(quiz_mcq_area, text=text_display, bd=0, relief=RIDGE, anchor=W,
+        font="-family {Comic Sans MS} -size 100", bg="#CBCAE6", foreground=color)
+    quiz_result_label.place(relx=0.8, rely=0.1, relheight=0.8, relwidth=0.15)
+
+
 def create_mcq(viet_translated_word):
     quiz_eng_chosen_dictionary = []
     quiz_viet_chosen_dictionary = []
@@ -504,12 +530,15 @@ def create_mcq(viet_translated_word):
     elif correct_index == 3:
         mcq_pool_word.insert(2, viet_translated_word)
 
-    buttonA = Button(quiz_mcq_area, text="A. " + mcq_pool_word[0], font="-family {Comic Sans MS} -size 12", anchor = W)
-    buttonA.place(relx=0.1, rely=0.1, relheight=0.2, relwidth=0.8)
-    buttonB = Button(quiz_mcq_area, text="B. " + mcq_pool_word[1], font="-family {Comic Sans MS} -size 12", anchor = W)
-    buttonB.place(relx=0.1, rely=0.4, relheight=0.2, relwidth=0.8)
-    buttonC = Button(quiz_mcq_area, text="C. " + mcq_pool_word[2], font="-family {Comic Sans MS} -size 12", anchor = W)
-    buttonC.place(relx=0.1, rely=0.7, relheight=0.2, relwidth=0.8)
+    buttonA = Button(quiz_mcq_area, text="A. " + mcq_pool_word[0], font="-family {Comic Sans MS} -size 12", anchor = W, command = lambda:check_mcq(mcq_pool_word[0], viet_translated_word),
+        background="#5E4388", foreground="#F7A7A6", activebackground="black", activeforeground="pink")
+    buttonA.place(relx=0.05, rely=0.1, relheight=0.2, relwidth=0.7)
+    buttonB = Button(quiz_mcq_area, text="B. " + mcq_pool_word[1], font="-family {Comic Sans MS} -size 12", anchor = W, command = lambda:check_mcq(mcq_pool_word[1], viet_translated_word),
+        background="#5E4388", foreground="#F7A7A6", activebackground="black", activeforeground="pink")
+    buttonB.place(relx=0.05, rely=0.4, relheight=0.2, relwidth=0.7)
+    buttonC = Button(quiz_mcq_area, text="C. " + mcq_pool_word[2], font="-family {Comic Sans MS} -size 12", anchor = W, command = lambda:check_mcq(mcq_pool_word[2], viet_translated_word),
+        background="#5E4388", foreground="#F7A7A6", activebackground="black", activeforeground="pink")
+    buttonC.place(relx=0.05, rely=0.7, relheight=0.2, relwidth=0.7)
 
 def check_fillin_quiz(new_textbox_list, quiz_word, viet_translated_word):
     string_to_compare = ''
@@ -524,12 +553,12 @@ def check_fillin_quiz(new_textbox_list, quiz_word, viet_translated_word):
     else:
         text_display = 'Wrong ✖'
         color = 'red'
-        create_mcq(viet_translated_word)
+        # create_mcq(viet_translated_word)
     result_label = Label(
         vocab_quiz_fillin_area, text=text_display, bd=0, relief=RIDGE, anchor=W,
-        font="-family {Comic Sans MS} -size 20", bg="#CBCAE6", foreground=color)
+        font="-family {Comic Sans MS} -size 40 -weight bold", bg="#CBCAE6", foreground=color)
     result_label.place(
-        relx=0.2, rely=0.7, relheight=0.2, relwidth=0.6)
+        relx=0.1, rely=0.7, relheight=0.2, relwidth=0.8)
     
 
 # function to generate the quiz after user select a quiz
@@ -541,14 +570,17 @@ def generate_question(x, eng_random_vocab_list, viet_random_vocab_list, quiz_eng
     quiz_word = eng_random_vocab_list[x]
     for word in quiz_eng_chosen_dictionary:
         if word[1] == quiz_word:
-            index = word[0]
+            quiz_word_index = word[0]
             break
     # quiz_img_path = str(index) + ".png"
-    viet_translated_word = quiz_eng_chosen_dictionary[index-2][3]
-    quiz_img_path = "1.png"
-    quiz_display_first_image = (Image.open(quiz_img_path))
-    resized_image= quiz_display_first_image.resize((430,400), Image.ANTIALIAS)
-    quiz_display_image= ImageTk.PhotoImage(resized_image)
+    viet_translated_word = quiz_eng_chosen_dictionary[quiz_word_index-2][3]
+    quiz_img_path = 'general_english_images/' + str(quiz_word_index) + ".png"
+    try:
+        quiz_display_first_image = (Image.open(quiz_img_path))
+    except:
+        quiz_display_first_image = (Image.open('general_english_images/0.png'))
+    quiz_resized_image= quiz_display_first_image.resize((430,400), Image.ANTIALIAS)
+    quiz_display_image= ImageTk.PhotoImage(quiz_resized_image)
     quiz_display_label = Label(quiz_image_frame)
     quiz_display_label.place(relx=0, rely=0, relheight=1, relwidth=1)
     quiz_display_label.image = quiz_display_image
@@ -586,6 +618,7 @@ def generate_question(x, eng_random_vocab_list, viet_random_vocab_list, quiz_eng
         new_textbox_list = new_textbox_list_row1 + new_textbox_list_row2
     
     for textbox in textbox_list:
+        textbox.config(state = NORMAL)
         textbox.delete('1.0', END)
         textbox.config(state = DISABLED, bg = original_bg_color_textbox, fg = 'black')
 
@@ -593,93 +626,96 @@ def generate_question(x, eng_random_vocab_list, viet_random_vocab_list, quiz_eng
         if quiz_word_char_list[idx] != ' ':
             textbox.config(state = NORMAL, bg = 'pink')
             textbox.insert(END, quiz_word_char_list[idx])
-        if quiz_word_char_list[idx] == '':
-            textbox.config(fg ='red')
+            if quiz_word_char_list[idx] == '':
+                textbox.config(fg ='red')
+            else:
+                textbox.config(state = DISABLED)
 
-    quiz_fillin_check_button = Button(vocab_quiz_fillin_area, text="Check", font="-family {Comic Sans MS} -size 12", command = lambda: check_fillin_quiz(new_textbox_list, quiz_word, viet_translated_word))
+    quiz_fillin_check_button = Button(vocab_quiz_fillin_area, text="Check", font="-family {Comic Sans MS} -size 12", command = lambda: check_fillin_quiz(new_textbox_list, quiz_word, viet_translated_word),
+        background="#5E4388", foreground="#F7A7A6", activebackground="black", activeforeground="pink")
     quiz_fillin_check_button.place(relx=0.75, rely=0.5, relheight=0.1, relwidth=0.2)
     
 
 
 # initiator all question buttons
 number1_ques_button = Button(quiz_question_canvas, text="1",
-                                 font="-family {Comic Sans MS} -size 9", state=DISABLED)
+                                font="-family {Comic Sans MS} -size 12", state=DISABLED)
 number1_ques_button.place(relx=0, rely=0, relheight=0.5, relwidth=0.1)
 
 number2_ques_button = Button(quiz_question_canvas, text="2",
-                                font="-family {Comic Sans MS} -size 9", state=DISABLED)
+                                font="-family {Comic Sans MS} -size 12", state=DISABLED)
 number2_ques_button.place(relx=0.1, rely=0, relheight=0.5, relwidth=0.1)
 
 number3_ques_button = Button(quiz_question_canvas, text="3",
-                                font="-family {Comic Sans MS} -size 9", state=DISABLED)
+                                font="-family {Comic Sans MS} -size 12", state=DISABLED)
 number3_ques_button.place(relx=0.2, rely=0, relheight=0.5, relwidth=0.1)
 
 number4_ques_button = Button(quiz_question_canvas, text="4",
-                                font="-family {Comic Sans MS} -size 9", state=DISABLED)
+                                font="-family {Comic Sans MS} -size 12", state=DISABLED)
 number4_ques_button.place(relx=0.3, rely=0, relheight=0.5, relwidth=0.1)
 
 number5_ques_button = Button(quiz_question_canvas, text="5",
-                                font="-family {Comic Sans MS} -size 9", state=DISABLED)
+                                font="-family {Comic Sans MS} -size 12", state=DISABLED)
 number5_ques_button.place(relx=0.4, rely=0, relheight=0.5, relwidth=0.1)
 
 number6_ques_button = Button(quiz_question_canvas, text="6",
-                                font="-family {Comic Sans MS} -size 9", state=DISABLED)
+                                font="-family {Comic Sans MS} -size 12", state=DISABLED)
 number6_ques_button.place(relx=0.5, rely=0, relheight=0.5, relwidth=0.1)
 
 number7_ques_button = Button(quiz_question_canvas, text="7",
-                                font="-family {Comic Sans MS} -size 9", state=DISABLED)
+                                font="-family {Comic Sans MS} -size 12", state=DISABLED)
 number7_ques_button.place(relx=0.6, rely=0, relheight=0.5, relwidth=0.1)
 
 number8_ques_button = Button(quiz_question_canvas, text="8",
-                                font="-family {Comic Sans MS} -size 9", state=DISABLED)
+                                font="-family {Comic Sans MS} -size 12", state=DISABLED)
 number8_ques_button.place(relx=0.7, rely=0, relheight=0.5, relwidth=0.1)
 
 number9_ques_button = Button(quiz_question_canvas, text="9",
-                                font="-family {Comic Sans MS} -size 9", state=DISABLED)
+                                font="-family {Comic Sans MS} -size 12", state=DISABLED)
 number9_ques_button.place(relx=0.8, rely=0, relheight=0.5, relwidth=0.1)
 
 number10_ques_button = Button(quiz_question_canvas, text="10",
-                                font="-family {Comic Sans MS} -size 9", state=DISABLED)
+                                font="-family {Comic Sans MS} -size 12", state=DISABLED)
 number10_ques_button.place(relx=0.9, rely=0, relheight=0.5, relwidth=0.1)
 
 number11_ques_button = Button(quiz_question_canvas, text="11",
-                                font="-family {Comic Sans MS} -size 9", state=DISABLED)
+                                font="-family {Comic Sans MS} -size 12", state=DISABLED)
 number11_ques_button.place(relx=0, rely=0.5, relheight=0.5, relwidth=0.1)
 
 number12_ques_button = Button(quiz_question_canvas, text="12",
-                                font="-family {Comic Sans MS} -size 9", state=DISABLED)
+                                font="-family {Comic Sans MS} -size 12", state=DISABLED)
 number12_ques_button.place(relx=0.1, rely=0.5, relheight=0.5, relwidth=0.1)
 
 number13_ques_button = Button(quiz_question_canvas, text="13",
-                                font="-family {Comic Sans MS} -size 9", state=DISABLED)
+                                font="-family {Comic Sans MS} -size 12", state=DISABLED)
 number13_ques_button.place(relx=0.2, rely=0.5, relheight=0.5, relwidth=0.1)
 
 number14_ques_button = Button(quiz_question_canvas, text="14",
-                                font="-family {Comic Sans MS} -size 9", state=DISABLED)
+                                font="-family {Comic Sans MS} -size 12", state=DISABLED)
 number14_ques_button.place(relx=0.3, rely=0.5, relheight=0.5, relwidth=0.1)
 
 number15_ques_button = Button(quiz_question_canvas, text="15",
-                                font="-family {Comic Sans MS} -size 9", state=DISABLED)
+                                font="-family {Comic Sans MS} -size 12", state=DISABLED)
 number15_ques_button.place(relx=0.4, rely=0.5, relheight=0.5, relwidth=0.1)
 
 number16_ques_button = Button(quiz_question_canvas, text="16",
-                                font="-family {Comic Sans MS} -size 9", state=DISABLED)
+                                font="-family {Comic Sans MS} -size 12", state=DISABLED)
 number16_ques_button.place(relx=0.5, rely=0.5, relheight=0.5, relwidth=0.1)
 
 number17_ques_button = Button(quiz_question_canvas, text="17",
-                                font="-family {Comic Sans MS} -size 9", state=DISABLED)
+                                font="-family {Comic Sans MS} -size 12", state=DISABLED)
 number17_ques_button.place(relx=0.6, rely=0.5, relheight=0.5, relwidth=0.1)
 
 number18_ques_button = Button(quiz_question_canvas, text="18",
-                                font="-family {Comic Sans MS} -size 9", state=DISABLED)
+                                font="-family {Comic Sans MS} -size 12", state=DISABLED)
 number18_ques_button.place(relx=0.7, rely=0.5, relheight=0.5, relwidth=0.1)
 
 number19_ques_button = Button(quiz_question_canvas, text="19",
-                                font="-family {Comic Sans MS} -size 9", state=DISABLED)
+                                font="-family {Comic Sans MS} -size 12", state=DISABLED)
 number19_ques_button.place(relx=0.8, rely=0.5, relheight=0.5, relwidth=0.1)
 
 number20_ques_button = Button(quiz_question_canvas, text="20",
-                                font="-family {Comic Sans MS} -size 9", state=DISABLED)
+                                font="-family {Comic Sans MS} -size 12", state=DISABLED)
 number20_ques_button.place(relx=0.9, rely=0.5, relheight=0.5, relwidth=0.1)
 
 # default color of button
@@ -698,7 +734,7 @@ def generate_question_bar(eng_random_vocab_list, viet_random_vocab_list, number_
             number6_ques_button, number7_ques_button, number8_ques_button, number9_ques_button, number10_ques_button,
             number11_ques_button, number12_ques_button, number13_ques_button, number14_ques_button, number15_ques_button,
             number16_ques_button, number17_ques_button, number18_ques_button, number19_ques_button, number20_ques_button]
-    
+
     number1_ques_button.config(command=lambda: generate_question(
                                 0, eng_random_vocab_list, viet_random_vocab_list, quiz_eng_chosen_dictionary))
 
@@ -763,7 +799,7 @@ def generate_question_bar(eng_random_vocab_list, viet_random_vocab_list, number_
     for i in range(20):
         quiz_question_button_list[i].config(state=DISABLED, background=original_bg_color, foreground=original_fore_color)
     for i in range(number_of_ques):
-        quiz_question_button_list[i].config(state=NORMAL, background="#F7A7A6", foreground="#5E4388")
+        quiz_question_button_list[i].config(state=NORMAL, background="#5E4388", foreground="#F7A7A6", activebackground="black", activeforeground="pink")
        
 
 
@@ -792,7 +828,8 @@ def generate_quiz():
 
 # button to generate quiz (based on above setting)
 quiz_selection_setting_generate_button = Button(quiz_setting_area, text="Generate quiz",
-                                                     font="-family {Comic Sans MS} -size 12", command=generate_quiz)
+                                                     font="-family {Comic Sans MS} -size 13", command=generate_quiz,
+                                                     background="#5E4388", foreground="#F7A7A6", activebackground="black", activeforeground="pink")
 quiz_selection_setting_generate_button.place(
     relx=0.5, rely=0.75, relheight=0.15, relwidth=0.45)
 
